@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+     
+     tools {
+        //Install maven
+        maven "Maven"
+     }
+    stages {
+        stage('stage 1 - Checkout Code') {
+            steps {
+                // get the code from github
+                git 'https://github.com/dp1109/Test1.git'
+            }
+        }
+         stage('stage 2 - Compile Code') {
+            steps {
+                bat "mvn compile"
+            }
+        }
+         stage('stage 3 - Run unit Tests') {
+            steps {
+                //cmd to run testcase
+                bat "mvn test"
+            }
+        }
+         stage('stage 4 - create build') {
+            steps {
+                //cmd to create the build project
+                bat "mvn package"
+            }
+        }
+    }
+    post {
+        failure {
+            echo "Email sent for jenkins build failed"
+        }
+    }
+}
