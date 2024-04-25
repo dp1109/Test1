@@ -138,9 +138,9 @@ prediction = classifier.predict(std_data)
 print(prediction)
 
 if (prediction[0] == 0):
-  print('The person the parson Instagram id is not fake')
+  print('The NEWS is not fake')
 elif (prediction[0] == 1):
-  print('The person the parson Instagram id is fake')
+  print('The NEWS is fake')
 
 
 
