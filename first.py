@@ -1,95 +1,146 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[24]:
+
+
+import numpy as np
 import pandas as pd
-import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn import svm
+from sklearn.metrics import accuracy_score
+     
 
-data = pd.read_csv('student_data.csv')
 
-import matplotlib.pyplot as plt
+# In[25]:
 
-# Function to help us plot
-def plot_points(data):
-    X = np.array(data[["gre","gpa"]])
-    y = np.array(data["admit"])
-    admitted = X[np.argwhere(y==1)]
-    rejected = X[np.argwhere(y==0)]
-    plt.scatter([s[0][0] for s in rejected], [s[0][1] for s in rejected], s = 25, color = 'red', edgecolor = 'k')
-    plt.scatter([s[0][0] for s in admitted], [s[0][1] for s in admitted], s = 25, color = 'cyan', edgecolor = 'k')
-    plt.xlabel('Test (GRE)')
-    plt.ylabel('Grades (GPA)')
-    
-# Plotting the points
-plot_points(data)
-plt.show()
 
-# Separating the ranks
-data_rank1 = data[data["rank"]==1]
-data_rank2 = data[data["rank"]==2]
-data_rank3 = data[data["rank"]==3]
-data_rank4 = data[data["rank"]==4]
+# loading the diabetes dataset to a pandas DataFrame
+insta_dataset = pd.read_csv(r"C:\Users\USER\Downloads\train.csv")
 
-# Plotting the graphs
-plot_points(data_rank1)
-plt.title("Rank 1")
-plt.show()
-plot_points(data_rank2)
-plt.title("Rank 2")
-plt.show()
-plot_points(data_rank3)
-plt.title("Rank 3")
-plt.show()
-plot_points(data_rank4)
-plt.title("Rank 4")
-plt.show()
 
-# Make dummy variables for rank
-one_hot_data = pd.concat([data, pd.get_dummies(data['rank'], prefix='rank')], axis=1)
+# In[26]:
 
-# Drop the previous rank column
-one_hot_data = one_hot_data.drop('rank', axis=1)
 
-# Print the first 10 rows of our data
-one_hot_data[:10]
+# getting the statistical measures of the data
+insta_dataset.describe()
 
-# Copying our data
-processed_data = one_hot_data[:]
 
-# Scaling the columns
-processed_data['gre'] = processed_data['gre']/800
-processed_data['gpa'] = processed_data['gpa']/4.0
-processed_data[:10]
+# In[27]:
 
-sample = np.random.choice(processed_data.index, size=int(len(processed_data)*0.9), replace=False)
-train_data, test_data = processed_data.iloc[sample], processed_data.drop(sample)
 
-import keras
+insta_dataset['fake'].value_counts()
 
-features = np.array(train_data.drop('admit', axis=1))
-targets = np.array(keras.utils.to_categorical(train_data['admit'], 2))
-features_test = np.array(test_data.drop('admit', axis=1))
-targets_test = np.array(keras.utils.to_categorical(test_data['admit'], 2))
 
-import numpy as np
-from keras.models import Sequential
-from keras.layers.core import Dense, Dropout, Activation
-from keras.optimizers import SGD
-from keras.utils import np_utils
+# In[28]:
 
-# Building the model
-model = Sequential()
-model.add(Dense(128, activation='relu', input_shape=(6,)))
-model.add(Dropout(.2))
-model.add(Dense(64, activation='relu'))
-model.add(Dropout(.1))
-model.add(Dense(2, activation='softmax'))
 
-# Compiling the model
-model.compile(loss = 'categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-model.summary()
+insta_dataset.groupby('fake').mean()
 
-# Training the model
-model.fit(features, targets, epochs=200, batch_size=100, verbose=0)
 
-# Evaluating the model on the training and testing set
-score = model.evaluate(features, targets)
-print("\n Training Accuracy:", score[1])
-score = model.evaluate(features_test, targets_test)
-print("\n Testing Accuracy:", score[1])
+# In[29]:
+
+
+# separating the data and labels
+X = insta_dataset.drop(columns = 'fake', axis=1)
+Y = insta_dataset['fake']
+
+
+# In[30]:
+
+
+scaler = StandardScaler()
+
+
+# In[31]:
+
+
+scaler.fit(X)
+
+
+# In[32]:
+
+
+standardized_data = scaler.transform(X)
+
+
+# In[33]:
+
+
+X = standardized_data
+Y = insta_dataset['fake']
+
+
+# In[34]:
+
+
+X_train, X_test, Y_train, Y_test = train_test_split(X,Y, test_size = 0.8, stratify=Y, random_state=2)
+
+
+# In[35]:
+
+
+classifier = svm.SVC(kernel='linear')
+
+
+# In[36]:
+
+
+#training the support vector Machine Classifier
+classifier.fit(X_train, Y_train)
+
+
+# In[37]:
+
+
+# accuracy score on the training data
+X_train_prediction = classifier.predict(X_train)
+training_data_accuracy = accuracy_score(X_train_prediction, Y_train)
+
+
+# In[38]:
+
+
+print('Accuracy score of the training data : ', training_data_accuracy)
+
+
+# In[39]:
+
+
+# accuracy score on the test data
+X_test_prediction = classifier.predict(X_test)
+test_data_accuracy = accuracy_score(X_test_prediction, Y_test)
+
+
+# In[40]:
+
+
+print('Accuracy score of the test data : ', test_data_accuracy)
+
+
+# In[41]:
+
+
+input_data = (0,0,1,0,0,0,0,0,0,17,44)
+
+# changing the input_data to numpy array
+input_data_as_numpy_array = np.asarray(input_data)
+
+# reshape the array as we are predicting for one instance
+input_data_reshaped = input_data_as_numpy_array.reshape(1,-1)
+
+# standardize the input data
+std_data = scaler.transform(input_data_reshaped)
+#print(std_data)
+
+prediction = classifier.predict(std_data)
+print(prediction)
+
+if (prediction[0] == 0):
+  print('The person the parson Instagram id is not fake')
+elif (prediction[0] == 1):
+  print('The person the parson Instagram id is fake')
+
+
+
