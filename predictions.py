@@ -1,1 +1,1 @@
-print("This is diabetes patient.")
+print("This BMW car Price is 200$")
