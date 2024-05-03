@@ -140,7 +140,7 @@ print(prediction)
 if (prediction[0] == 0):
   print('The NEWS is not fake')
 elif (prediction[0] == 1):
-  print('The NEWS is fake')
+  print('This is diabetes patient.')
 
 
 
